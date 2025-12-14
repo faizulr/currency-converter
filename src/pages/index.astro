@@ -1,0 +1,254 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { currencies } from '../lib/currencies';
+---
+
+<Layout>
+	<main class="min-h-screen flex flex-col">
+		<header class="w-full px-4 py-6 flex justify-between items-center max-w-4xl mx-auto">
+			<h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Currency Converter</h1>
+			<button
+				id="theme-toggle"
+				aria-label="Toggle dark mode"
+				class="p-2.5 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+			>
+				<svg id="theme-icon-sun" class="w-5 h-5 text-gray-800 hidden dark:block" fill="currentColor" viewBox="0 0 20 20">
+					<path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
+				</svg>
+				<svg id="theme-icon-moon" class="w-5 h-5 text-gray-800 block dark:hidden" fill="currentColor" viewBox="0 0 20 20">
+					<path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+				</svg>
+			</button>
+		</header>
+
+		<div class="flex-1 flex items-center justify-center px-4 py-8">
+			<div class="w-full max-w-2xl">
+				<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-10 space-y-8">
+					<div id="loading-state" class="hidden text-center py-8">
+						<div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400"></div>
+						<p class="mt-4 text-gray-600 dark:text-gray-300">Fetching latest rates...</p>
+					</div>
+
+					<div id="error-state" class="hidden text-center py-8">
+						<p class="text-red-600 dark:text-red-400 font-medium">Rates temporarily unavailable</p>
+						<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Using last known rates</p>
+					</div>
+
+					<div id="converter-form" class="space-y-8">
+						<div>
+							<label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+								Amount
+							</label>
+							<input
+								type="number"
+								id="amount"
+								value="1"
+								min="0"
+								step="any"
+								class="w-full text-3xl md:text-4xl font-bold bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-xl px-6 py-4 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+								aria-label="Amount to convert"
+							/>
+						</div>
+
+						<div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-end">
+							<div>
+								<label for="from-currency" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+									From
+								</label>
+								<select
+									id="from-currency"
+									class="w-full bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer"
+									aria-label="Currency to convert from"
+								>
+									{currencies.map((currency) => (
+										<option value={currency.code} selected={currency.code === 'usd'}>
+											{currency.flag} {currency.code.toUpperCase()} - {currency.name}
+										</option>
+									))}
+								</select>
+							</div>
+
+							<button
+								id="swap-btn"
+								aria-label="Swap currencies"
+								class="mb-0 md:mb-[6px] p-3 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transform hover:scale-105"
+							>
+								<svg class="w-6 h-6 transform rotate-90 md:rotate-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+								</svg>
+							</button>
+
+							<div>
+								<label for="to-currency" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+									To
+								</label>
+								<select
+									id="to-currency"
+									class="w-full bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer"
+									aria-label="Currency to convert to"
+								>
+									{currencies.map((currency) => (
+										<option value={currency.code} selected={currency.code === 'eur'}>
+											{currency.flag} {currency.code.toUpperCase()} - {currency.name}
+										</option>
+									))}
+								</select>
+							</div>
+						</div>
+
+						<div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-600 rounded-xl p-6 md:p-8">
+							<div class="text-sm text-gray-600 dark:text-gray-300 mb-2">Converted Amount</div>
+							<div id="result" class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
+								0.00
+							</div>
+							<div id="rate-info" class="mt-4 text-sm text-gray-600 dark:text-gray-300">
+								<span id="rate-display">1 USD ≈ 1.00 EUR</span>
+							</div>
+							<div id="last-updated" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+								Last updated: Just now
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<footer class="w-full px-4 py-6 text-center text-sm text-gray-600 dark:text-gray-400">
+			<p>Powered by <a href="https://github.com/fawazahmed0/exchange-api" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline">open exchange rate data</a></p>
+		</footer>
+	</main>
+</Layout>
+
+<script>
+	import { fetchExchangeRates, convertCurrency, getExchangeRate, formatCurrencyAmount, getLastUpdated, type ExchangeRates } from '../lib/currencyApi';
+	import { getCurrencyByCode } from '../lib/currencies';
+
+	let rates: ExchangeRates | null = null;
+
+	const amountInput = document.getElementById('amount') as HTMLInputElement;
+	const fromSelect = document.getElementById('from-currency') as HTMLSelectElement;
+	const toSelect = document.getElementById('to-currency') as HTMLSelectElement;
+	const swapBtn = document.getElementById('swap-btn') as HTMLButtonElement;
+	const resultDiv = document.getElementById('result') as HTMLDivElement;
+	const rateDisplay = document.getElementById('rate-display') as HTMLSpanElement;
+	const lastUpdatedDiv = document.getElementById('last-updated') as HTMLDivElement;
+	const loadingState = document.getElementById('loading-state') as HTMLDivElement;
+	const errorState = document.getElementById('error-state') as HTMLDivElement;
+	const converterForm = document.getElementById('converter-form') as HTMLDivElement;
+	const themeToggle = document.getElementById('theme-toggle') as HTMLButtonElement;
+
+	async function initialize() {
+		loadingState.classList.remove('hidden');
+		converterForm.classList.add('hidden');
+		errorState.classList.add('hidden');
+
+		try {
+			rates = await fetchExchangeRates('usd');
+			loadingState.classList.add('hidden');
+			converterForm.classList.remove('hidden');
+			updateLastUpdated();
+			loadSavedCurrencies();
+			performConversion();
+		} catch (error) {
+			console.error('Failed to initialize:', error);
+			loadingState.classList.add('hidden');
+			errorState.classList.remove('hidden');
+			converterForm.classList.remove('hidden');
+		}
+	}
+
+	function performConversion() {
+		if (!rates) return;
+
+		try {
+			const amount = parseFloat(amountInput.value) || 0;
+			const fromCurrency = fromSelect.value;
+			const toCurrency = toSelect.value;
+
+			const converted = convertCurrency(amount, fromCurrency, toCurrency, rates);
+			const rate = getExchangeRate(fromCurrency, toCurrency, rates);
+
+			resultDiv.textContent = formatCurrencyAmount(converted, toCurrency);
+
+			const rateText = `1 ${fromCurrency.toUpperCase()} ≈ ${formatCurrencyAmount(rate, toCurrency)} ${toCurrency.toUpperCase()}`;
+			rateDisplay.textContent = rateText;
+
+			saveCurrencies(fromCurrency, toCurrency);
+		} catch (error) {
+			console.error('Conversion error:', error);
+			resultDiv.textContent = 'Error';
+		}
+	}
+
+	function swapCurrencies() {
+		const temp = fromSelect.value;
+		fromSelect.value = toSelect.value;
+		toSelect.value = temp;
+		performConversion();
+	}
+
+	function updateLastUpdated() {
+		const lastUpdate = getLastUpdated();
+		if (lastUpdate) {
+			const now = new Date();
+			const diffMs = now.getTime() - lastUpdate.getTime();
+			const diffMins = Math.floor(diffMs / 60000);
+
+			if (diffMins < 1) {
+				lastUpdatedDiv.textContent = 'Last updated: Just now';
+			} else if (diffMins < 60) {
+				lastUpdatedDiv.textContent = `Last updated: ${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+			} else {
+				const diffHours = Math.floor(diffMins / 60);
+				lastUpdatedDiv.textContent = `Last updated: ${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+			}
+		}
+	}
+
+	function saveCurrencies(from: string, to: string) {
+		localStorage.setItem('lastFromCurrency', from);
+		localStorage.setItem('lastToCurrency', to);
+	}
+
+	function loadSavedCurrencies() {
+		const savedFrom = localStorage.getItem('lastFromCurrency');
+		const savedTo = localStorage.getItem('lastToCurrency');
+
+		if (savedFrom && fromSelect.querySelector(`option[value="${savedFrom}"]`)) {
+			fromSelect.value = savedFrom;
+		}
+		if (savedTo && toSelect.querySelector(`option[value="${savedTo}"]`)) {
+			toSelect.value = savedTo;
+		}
+	}
+
+	function toggleTheme() {
+		const html = document.documentElement;
+		const isDark = html.classList.contains('dark');
+
+		if (isDark) {
+			html.classList.remove('dark');
+			localStorage.setItem('theme', 'light');
+		} else {
+			html.classList.add('dark');
+			localStorage.setItem('theme', 'dark');
+		}
+	}
+
+	let debounceTimer: number;
+	function debounce(func: () => void, delay: number) {
+		clearTimeout(debounceTimer);
+		debounceTimer = window.setTimeout(func, delay);
+	}
+
+	amountInput.addEventListener('input', () => {
+		debounce(performConversion, 300);
+	});
+
+	fromSelect.addEventListener('change', performConversion);
+	toSelect.addEventListener('change', performConversion);
+	swapBtn.addEventListener('click', swapCurrencies);
+	themeToggle.addEventListener('click', toggleTheme);
+
+	initialize();
+</script>
